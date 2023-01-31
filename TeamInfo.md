@@ -6,16 +6,14 @@
 | ----------- | ---------------------- |
 | TeamID      |        Team-089        |
 | TeamName    |         arys         |
-| Captain     |       Abdu Alawini     |
-| Captain     |  alawini@illinois.edu  |
-| Member1     |        Riya Rahul Kulkarni       |
+| Captain     |       Sritha Kavuri     |
+| Captain     |  skavuri2@illinois.edu  |
+| Member1     |    Riya Rahul Kulkarni  |
 | Member1     |   riyark3@illinois.edu  |
-| Member2     |  Sritha Kavuri  |
-| Member2     |   skavuri2@illinois.edu  |
-| Member3     |     Yue Zeng     |
-| Member3     |  yuezeng4@illinois.edu |
-| Member4     |     Ayush Basu     |
-| Member4     |  ayushb3@illinois.edu |
+| Member2     |     Yue Zeng     |
+| Member2     |  yuezeng4@illinois.edu |
+| Member3     |     Ayush Basu     |
+| Member3     |  ayushb3@illinois.edu |
 
 ## Project Information
 
