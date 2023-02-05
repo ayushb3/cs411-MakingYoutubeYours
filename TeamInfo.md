@@ -8,7 +8,7 @@
 | TeamName    |         arys         |
 | Captain     |       Sritha Kavuri     |
 | Captain     |  skavuri2@illinois.edu  |
-| Member1     |    Riya Rahul Kulkarni  |
+| Member1     |    Riya Kulkarni  |
 | Member1     |   riyark3@illinois.edu  |
 | Member2     |     Yue Zeng     |
 | Member2     |  yuezeng4@illinois.edu |
