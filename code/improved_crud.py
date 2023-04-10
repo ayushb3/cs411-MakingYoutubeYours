@@ -190,6 +190,63 @@ def check_video_exists(video_id, connection):
     return result is not None
 
 
+def top10_for_over1milcreators(connection):
+    query = """
+    SELECT v.title, v.view_count
+    FROM VideoInfo v
+    JOIN 
+    (
+      SELECT v1.video_id
+      FROM VideoInfo v1
+      WHERE v1.view_count >= 1000000
+    ) v1 
+    ON v.video_id = v1.video_id
+    JOIN 
+    (
+      SELECT DISTINCT c.channelId
+      FROM Creators c
+      JOIN VideoInfo v2 ON c.channelId = v2.channelId
+      WHERE v2.view_count >= 1000000
+      GROUP BY c.channelId
+      HAVING COUNT(DISTINCT v2.video_id) > 1
+    ) c 
+    ON v.channelId = c.channelId
+    ORDER BY v.view_count DESC
+    LIMIT 15;
+    """
+    cursor = connection.cursor()
+    cursor.execute(query)
+    results = cursor.fetchall()
+
+    cursor.close()
+
+    return results
+
+
+def num_vids_per_category_with_most_common_word(connection):
+    query = """
+        SELECT categoryId, COUNT(*) FROM VideoInfo
+    WHERE title LIKE 
+    CONCAT('%', 
+    (
+    SELECT keywords
+    FROM TrendingKeywords
+    ORDER BY use_count DESC
+    LIMIT 1
+    ),
+    '%')
+    GROUP BY categoryId;
+    """
+
+    cursor = connection.cursor()
+    cursor.execute(query)
+    results = cursor.fetchall()
+
+    cursor.close()
+
+    return results
+
+
 def main():
     # Connect to the MySQL database
     connection = connect()
@@ -224,8 +281,13 @@ def main():
                         connection, new_username, new_password, new_email)
     print("Website user has been updated in the database.")
 
+    top10 = top10_for_over1milcreators(connection)
+    num_vids = num_vids_per_category_with_most_common_word(connection)
+    print(top10)
+    print(num_vids)
     # Close the database connection
     connection.close()
 
 
-main()
+if __name__ == "__main__":
+    main()
