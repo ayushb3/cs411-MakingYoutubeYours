@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Insert User</title>
+</head>
+
+<body>
+    <h1>Insert User</h1>
+    <form method="post" action="{{ url_for('insert_user') }}">
+        <label for="name">Name:</label>
+        <input type="text" name="name" required><br>
+
+        <label for="password">Password:</label>
+        <input type="password" name="password" required><br>
+
+        <label for="email">Email:</label>
+        <input type="email" name="email" required><br>
+
+        <label for="channel_title">Channel Title:</label>
+        <input type="text" name="channel_title" required><br>
+
+        <input type="submit" value="Insert User">
+    </form>
+
+</html>

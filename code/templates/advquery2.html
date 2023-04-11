@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>AdvQuery2 Results</title>
+</head>
+
+<body>
+    <h1>AdvQuery2 Results</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Category ID</th>
+                <th>Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr>
+                <td>{{ result[0] }}</td>
+                <td>{{ result[1] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Advanced Query 1 Results</title>
+</head>
+
+<body>
+    <h1>Advanced Query 1 Results</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>View Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr>
+                <td>{{ result[0] }}</td>
+                <td>{{ result[1] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>

@@ -1,6 +1,15 @@
-import mysql.connector
-from mysql.connector import Error
 import youtube_analysis
+from mysql.connector import Error
+import mysql.connector
+from flask import Flask, render_template, request, redirect, session
+import sys
+import logging
+import secrets
+
+logging.basicConfig(level=logging.DEBUG)
+
+app = Flask(__name__)
+app.secret_key = secrets.token_hex(16)
 
 
 def connect():
@@ -17,6 +26,36 @@ def connect():
         print(f'Error connecting to MySQL database: {e}')
 
 
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
+@app.route('/form.html')
+def form():
+    return render_template('form.html')
+
+
+# Insert video data into VideoInfo table
+@app.route('/insert_video.html', methods=['GET', 'POST'])
+def insert():
+    if request.method == 'POST':
+        URL = request.form['URL']
+        connection = connect()
+        is_existing, new_creator_added = insert_video(URL, connection)
+        if is_existing:
+            return 'Video already exists in database'
+        elif new_creator_added:
+            return 'Video added to new creator in database'
+        else:
+            return 'Video added to existing creator in database'
+    else:
+        return render_template('insert_video.html')
+
+# inserts a video based on a Youtube link
+# returns whether or not the video already existed or if a new creator was added
+
+
 def insert_video(URL, connection):
     video_id = youtube_analysis.youtube_link_to_id(URL)
     channelId, channel_title, categoryId, video_id, title, publishedAt, tags, description, comment_count, view_count, likes, dislikes = youtube_analysis.extract_video_info(
@@ -26,6 +65,18 @@ def insert_video(URL, connection):
         tags = ', '.join(tags)
     # connect to DB
     cursor = connection.cursor()
+
+    # adding functionality to return whether the video already existed or a new creator was added
+    video_exists = False
+    new_creator_added = False
+
+    sql = "SELECT COUNT(*) FROM VideoInfo WHERE video_id = %s"
+    vals = (video_id,)
+    cursor.execute(sql, vals)
+    count = cursor.fetchone()[0]
+    if count > 0:
+        video_exists = True
+
     # insert video; if id already exists, update the values since this will be more up to date
     sql = "INSERT INTO VideoInfo (video_id, title, publishedAt, tags, description, channelId, categoryId, view_count, likes, dislikes, comment_count) \
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) \
@@ -54,7 +105,7 @@ def insert_video(URL, connection):
         comment_count
     )
     cursor.execute(sql, vals)
-
+    print('hello')
     # check if the channelId exists in Creators table
     cursor.execute("SELECT 1 FROM Creators WHERE channelId = %s", (channelId,))
     result = cursor.fetchone()
@@ -63,14 +114,26 @@ def insert_video(URL, connection):
     if not result:
         cursor.execute("INSERT INTO Creators (channelId, channelTitle, categoryId, video_id) VALUES (%s, %s, %s, %s)",
                        (channelId, channel_title, categoryId, video_id))
-
+        new_creator_added = True
     connection.commit()
+    return video_exists, new_creator_added
+
+# Search for videos in VideoInfo table based on search term
 
 
-def search_videos(connection):
+@app.route('/search.html', methods=['GET', 'POST'])
+def search():
+    if request.method == 'POST':
+        search_term = request.form['search_term']
+        connection = connect()
+        results = search_videos(search_term, connection)
+        return render_template('search.html', results=results)
+    else:
+        return render_template('search.html')
+
+
+def search_videos(search_term, connection):
     cursor = connection.cursor()
-
-    search_term = input("Enter search term: ")
 
     sql = "SELECT title FROM VideoInfo WHERE MATCH (title) AGAINST (%s IN NATURAL LANGUAGE MODE)"
     vals = (f"'{search_term}'",)
@@ -83,6 +146,33 @@ def search_videos(connection):
     return results
 
 
+@app.route('/insert_user.html', methods=['GET', 'POST'])
+def insert_user():
+    app.logger.info('INSIDE INSERT USER')
+    if request.method == 'POST':
+        username = request.form['name']
+        password = request.form['password']
+        email = request.form['email']
+        channel_title = request.form['channel_title']
+        connection = connect()
+        app.logger.info('HERE1')
+
+        result = insert_website_user(
+            username, password, email, channel_title, connection)
+        app.logger.info('HERE2')
+
+        if result == "Succesfully inserted user.":
+            return result
+        elif result == "I need a video link.":
+            app.logger.info('HERE3')
+            session['name'] = request.form['name']
+            session['password'] = request.form['password']
+            session['email'] = request.form['email']
+            return redirect('/insert_user_with_video_link.html')
+    else:
+        return render_template('insert_user.html')
+
+
 def insert_website_user(username, password, email, channel_title, connection):
     cursor = connection.cursor()
 
@@ -93,34 +183,18 @@ def insert_website_user(username, password, email, channel_title, connection):
     result = cursor.fetchone()
 
     if result[0] > 0:
-        print(f"Cannot insert user. Email already exists in the database.")
-        return
+        return (f"Cannot insert user. Email already exists in the database.")
 
     # check if channel_title exists in Creators table
     sql = "SELECT channelId FROM Creators WHERE channelTitle = %s"
     vals = (channel_title,)
     cursor.execute(sql, vals)
     results = cursor.fetchall()
-
+    print('here3')
     # if there are no results or multiple results, ask for a video link to identify the correct channelId
-    if not results:
-        video_link = input(
-            f"No unique channelId found for {channel_title}. Please provide a video link to identify the correct channel: ")
-        insert_video(video_link, connection)
-        video_id = youtube_analysis.youtube_link_to_id(video_link)
-        info = youtube_analysis.extract_video_info(video_id)
-        channel_id = info[0]
-
-    elif len(results) > 1:
-        video_link = input(
-            f"No unique channelId found for {channel_title}. Please provide a video link to identify the correct channel: ")
-        video_id = youtube_analysis.youtube_link_to_id(video_link)
-        sql = "SELECT channelId FROM Creators WHERE channelTitle = %s AND video_id = %s"
-        vals = (channel_title, video_id)
-        cursor.execute(sql, vals)
-        results = cursor.fetchall()
-        # get the channelId from the results
-        channel_id = results[0][0]
+    if not results or len(results) > 1:
+        print('here4')
+        return "I need a video link."
     else:
         channel_id = results[0][0]
 
@@ -130,6 +204,58 @@ def insert_website_user(username, password, email, channel_title, connection):
     cursor.execute(sql, vals)
 
     connection.commit()
+    return "Successfully inserted user."
+
+
+@app.route('/insert_user_with_video_link.html', methods=['GET', 'POST'])
+def insert_user_with_video_link():
+    print('here4')
+
+    username = session.get('name')
+    password = session.get('password')
+    email = session.get('email')
+    if request.method == 'POST':
+        video_link = request.form['video_link']
+        connection = connect()
+        channel_id = get_channel_id(video_link, connection)
+        # insert the website user
+        cursor = connection.cursor()
+        sql = "INSERT INTO WebsiteUsers (username, password, email, channelId) VALUES (%s, %s, %s, %s)"
+        vals = (username, password, email, channel_id)
+        cursor.execute(sql, vals)
+
+        connection.commit()
+        return "Successfully inserted user."
+
+    else:
+        return render_template('insert_user_with_video_link.html')
+
+
+def get_channel_id(video_link, connection):
+
+    insert_video(video_link, connection)
+    video_id = youtube_analysis.youtube_link_to_id(video_link)
+    info = youtube_analysis.extract_video_info(video_id)
+    channel_id = info[0]
+
+    return channel_id
+
+
+@app.route('/update_user.html', methods=['GET', 'POST'])
+def update_user():
+    if request.method == 'POST':
+        current_username = request.form['current_username']
+        current_password = request.form['current_password']
+        new_username = request.form.get('new_username')
+        new_password = request.form.get('new_password')
+        new_email = request.form.get('new_email')
+
+        connection = connect()
+        output = update_website_user(current_username, current_password, connection,
+                                     new_username, new_password, new_email)
+        return output
+    else:
+        return render_template('update_user.html')
 
 
 def update_website_user(current_username, current_password, connection, new_username=None, new_password=None, new_email=None):
@@ -139,8 +265,7 @@ def update_website_user(current_username, current_password, connection, new_user
     result = cursor.fetchone()
 
     if result is None:
-        print(f"No user found with this username and password combination")
-        return
+        return ("No user found with this username and password combination")
 
     user_id, username, password, email, channelId = result
 
@@ -157,9 +282,23 @@ def update_website_user(current_username, current_password, connection, new_user
         vals = (username, password, email, channelId, user_id)
         cursor.execute(sql, vals)
         connection.commit()
-        print("Successfully updated user")
+        return ("Successfully updated user")
     else:
-        print("No new values provided for update")
+        return ("No new values provided for update")
+
+
+@app.route('/delete_user.html', methods=['GET', 'POST'])
+def delete_user():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        connection = connect()
+        output = delete_website_user(username, password, connection)
+
+        return output
+    else:
+        return render_template('delete_user.html')
 
 
 def delete_website_user(username, password, connection):
@@ -171,25 +310,22 @@ def delete_website_user(username, password, connection):
     result = cursor.fetchone()
 
     if result is None:
-        print("No user found with this username and password combination")
-        return
+        return ("No user found with this username and password combination")
+
     user_id = result[0]
     # Delete user
     sql = "DELETE FROM WebsiteUsers WHERE user_id = %s"
     cursor.execute(sql, (user_id,))
     connection.commit()
 
-    print("Successfully deleted user")
+    return ("Successfully deleted user")
 
 
-def check_video_exists(video_id, connection):
-    cursor = connection.cursor()
-    sql = "SELECT 1 FROM VideoInfo WHERE video_id = %s"
-    cursor.execute(sql, (video_id,))
-    result = cursor.fetchone()
-    return result is not None
-
-# top10_for_over1milcreators
+@app.route('/advquery1')
+def advquery1_endpoint():
+    connection = connect()
+    results = advquery1(connection)
+    return render_template('advquery1.html', results=results)
 
 
 def advquery1(connection):
@@ -224,7 +360,12 @@ def advquery1(connection):
 
     return results
 
-# num_vids_per_category_with_most_common_word
+
+@app.route('/advquery2', methods=['GET'])
+def advquery2_endpoint():
+    connection = connect()
+    results = advquery2(connection)
+    return render_template('advquery2.html', results=results)
 
 
 def advquery2(connection):
@@ -251,47 +392,5 @@ def advquery2(connection):
     return results
 
 
-def main():
-    # Connect to the MySQL database
-    connection = connect()
-
-    # Insert a video into the database
-    video_link = input("Enter a YouTube video link: ")
-    insert_video(video_link, connection)
-    print("Video info has been inserted into the database.")
-
-    # Search for videos in the database
-    results = search_videos(connection)
-    print(f"Search Results: {results}")
-
-    # Insert a website user into the database
-    username = input("Enter a username: ")
-    password = input("Enter a password: ")
-    email = input("Enter an email address: ")
-    channel_title = input("Enter the title of the YouTube channel: ")
-    insert_website_user(username, password, email, channel_title, connection)
-    print("Website user has been inserted into the database.")
-
-    # Update a website user in the database
-    current_username = input("Enter the current username: ")
-    current_password = input("Enter the current password: ")
-    new_username = input(
-        "Enter a new username (leave blank to keep current): ")
-    new_password = input(
-        "Enter a new password (leave blank to keep current): ")
-    new_email = input(
-        "Enter a new email address (leave blank to keep current): ")
-    update_website_user(current_username, current_password,
-                        connection, new_username, new_password, new_email)
-    print("Website user has been updated in the database.")
-
-    top10 = advquery1(connection)
-    num_vids = advquery2(connection)
-    print(top10)
-    print(num_vids)
-    # Close the database connection
-    connection.close()
-
-
 if __name__ == "__main__":
-    main()
+    app.run()

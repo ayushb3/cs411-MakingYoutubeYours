@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Insert User with Video Link</title>
+</head>
+
+<body>
+    <h1>Insert User with Video Link</h1>
+    <p>Enter your YouTube video link to identify your channel:</p>
+    <form method="POST" action="{{ url_for('insert_user_with_video_link') }}">
+        <label for="video_link">YouTube Video Link:</label>
+        <input type="text" id="video_link" name="video_link" required>
+        <br><br>
+        <button type="submit">Submit</button>
+    </form>
+</body>
+
+</html>
