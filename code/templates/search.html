@@ -8,17 +8,21 @@
 <body>
   <h1>Search Videos</h1>
   <form method="POST">
-    <label for="search_term">Search Term:</label>
-    <input type="text" id="search_term" name="search_term" required>
+    <label for="search_term">Search term:</label>
+    <input type="text" id="search_term" name="search_term">
     <button type="submit">Search</button>
   </form>
   {% if results %}
-  <h2>Results:</h2>
+  <h2>Search results:</h2>
   <ul>
     {% for result in results %}
     <li>{{ result[0] }}</li>
     {% endfor %}
   </ul>
+  {% else %}
+  {% if request.method == 'POST' %}
+  <p>No results found.</p>
+  {% endif %}
   {% endif %}
 </body>
 

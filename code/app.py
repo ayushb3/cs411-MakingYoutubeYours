@@ -142,7 +142,7 @@ def search_videos(search_term, connection):
     results = cursor.fetchall()
 
     if len(results) == 0:
-        return "No results found."
+        return
     return results
 
 
