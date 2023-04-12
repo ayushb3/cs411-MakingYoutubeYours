@@ -8,10 +8,10 @@
             "server": "35.193.136.209",
             "port": 3306,
             "driver": "MySQL",
-            "name": "cs411",
+            "name": "GCP",
             "database": "YoutubeTrending",
             "username": "root",
-            "password": "test1234"
+            "askForPassword": true
         }
     ]
 }
