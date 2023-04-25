@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="test.css" />
+<script src = "test.js"></script>
+<title>CSV Parser</title>
+
+<body>
+    <a name="top">
+        <table border="1" style="text-align:center; width:100%">
+          <tr style="color:rgb(210,30,30);">
+            <td><a href = "index.html"> Home </a></td>
+            <td><a href = "titlegen.html">Title Generator </a></td>
+            <td><a href = "trending.html"> What's Trending </a></td>
+            <td><a href = "events.html"> Current Events </a></td>
+            <td><a href = "tracking.html"> Track A YouTuber </a></td>
+            <td><a href = "form.html"> Form </a></td>
+            <td><a href = "parse.html"> Filter Data </a></td>
+          </tr>
+        </table>
+
+    <br/>
+
+    <h1>Cleaning Data!</h1>
+
+    <p>The buttons at the bottom of this page allow you to choose a file from your computer and remove unwanted columns from this file. 
+        <br/> The form will output your cleaned array. <br/> To make this work, we used a Javascript function paired with an HTML form to take in the input file.
+    </p>
+
+    <h2>How to use it: </h2>
+    <ol>
+        <li>Access the parse.html file within the test folder.</li>
+        <li>Do not change anything in this file except for 4 integer values.
+            <ul>
+                <li>On line 78, you will see a comment "SPLICE THE DATA"</li>
+                <li>In the immediately following for loop, there are two lines (lines 83, 84), both say "rows[i] = data.splice(int, int)"</li>
+                <li>Change these integer values to edit the data according to the columns that you would like</li>
+                <li>If you need more columns spliced, uncomment the third and fourth lines (lines 85, 86) that say "rows[i] = data.splice(int, int)" and use them</li>
+                <li>Make sure your code is saved and then on the website, choose your csv file and click the "Submit" button</li>
+                <li>This should output your data in csv format! Copy and paste it into a csv file and you are good to go!</li>
+            </ul>
+        </li>
+    </ol> <br/><br/>
+
+
+    <!--Form is used to create the choose file and the submit buttons-->
+    <form id="myForm" target="_blank">
+      <input type="file" id="csvFile" accept=".csv" />
+      <br /> <br/>
+      <input type="submit" value="Submit" />
+    </form>
+    <script>
+        // the following two variables provide inputs to the form
+      const myForm = document.getElementById("myForm");
+      const csvFile = document.getElementById("csvFile");
+  
+        // FUNCTION TO CONVERT CSV TO ARRAY
+        function csvToArray(str, delimiter = ",") {
+            // slice from start of text to the first \n index
+            // use split to create an array from string by delimiter
+            const headers = str.slice(0, str.indexOf("\n")).split(delimiter);
+
+            // slice from \n index + 1 to the end of the text
+            // use split to create an array of each csv value row
+            const rows = str.slice(str.indexOf("\n") + 1).split("\n");
+            //SPLICE THE DATA
+            // here i want columns 0 and 28. First i remove all columns between 0 and 28 using .splice(1,27)
+            // then i remove all columns after 28. but now, 28 is the 2nd column. so i .splice(2,14)
+            for(var i = 0; i < rows.length; ++i) {
+                rows[i] = rows[i].split("\",\"");
+                rows[i].splice(0,5); // .splice(index of the first column you want removed, how many columns to the right of it u want removed)
+                rows[i].splice(1,3);
+                rows[i].splice(4,14); // will have to use the newly spliced indexes here
+                // rows[i].splice(int, int);
+                // rows[i].splice(int, int);
+                rows[i] = rows[i].join(","); //    comment this if you want a 2D array
+            }
+            return rows.join("<br>");     // returns CSV
+            // return values;   
+
+            // Map the rows
+            // split values from each row into an array
+            // use headers.reduce to create an object
+            // object properties derived from headers:values
+            // the object passed as an element of the array
+            const arr = rows.map(function (row) { 
+
+                const values = row.split(delimiter);
+                const el = headers.reduce(function (object, header, index) {
+                object[header] = values[index];
+                return object;
+                }, {});
+                
+                return values;
+                return e1;
+            });
+
+            // return the array
+            return arr;
+        }
+
+        myForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const input = csvFile.files[0];
+        const reader = new FileReader();
+  
+        reader.onload = function (e) {
+        const text = e.target.result;
+        const data = csvToArray(text);  // array being returned = "data"
+        document.write(JSON.stringify(data) + "<br>");
+        data.forEach((values,keys)=>{
+            document.write(values);
+            document.write("<br>")
+        })
+
+        };
+  
+        reader.readAsText(input);
+      });
+        
+    </script>
+    
+  </body>

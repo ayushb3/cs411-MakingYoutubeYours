@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<link rel="stylesheet" type="text/css" href="test.css" />
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+<head>
+  <title>Stacked Bar Chart</title>
+</head>
+
+<body>
+    <a name="top">
+        <table border="1" style="text-align:center; width:100%">
+          <tr style="color:rgb(210,30,30);">
+            <td><a href = "index.html"> Home </a></td>
+            <td><a href = "titlegen.html">Title Generator </a></td>
+            <td><a href = "trending.html"> What's Trending </a></td>
+            <td><a href = "events.html"> Current Events </a></td>
+            <td><a href = "tracking.html"> Track A YouTuber </a></td>
+            <td><a href = "form.html"> Form </a></td>
+            <td><a href = "parse.html"> Filter Data </a></td>
+          </tr>
+        </table>
+
+  <br /><br />
+
+  <!-- Create a div where the graph will take place -->
+  <div id="my_dataviz"></div>
+
+  <h3>Customizing Your Chart!</h3>
+
+  <p>
+    This graph shows category IDs as they correspond to the number of likes, dislikes, and comments. 
+    <br/> You can see the exact number by hovering over each section of this stacked barchart.
+  </p>
+
+  <br /><br />
+</body>
+
+<script>
+  // set the dimensions and margins of the graph
+  var margin = { top: 10, right: 60, bottom: 40, left: 80 },
+    width = 1410 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+
+  // append the svg object to the body of the page
+  var svg = d3
+    .select("#my_dataviz")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  // Parse the Data
+  d3.csv("stacked_barchart.csv", function (data) {
+    // List of subgroups = header of the csv files = soil condition here
+    var subgroups = data.columns.slice(1);
+
+    // List of groups = species here = value of the first column called group -> I show them on the X axis
+    // FIRST DATA COLUMN MUST BE NAMED GROUP. DOES NOT WORK OTHERWISE
+    var groups = d3
+      .map(data, function (d) {
+        return d.group;
+      })
+      .keys();
+
+    // Add X axis
+    var x = d3.scaleBand().domain(groups).range([0, width]).padding([0.2]);
+    svg
+      .append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x).tickSizeOuter(0));
+
+    // Add Y axis
+    var y = d3.scaleLinear().domain([0, 1500000]).range([height, 0]);
+    svg.append("g").call(d3.axisLeft(y));
+
+    // color palette = one color per subgroup
+    var color = d3
+      .scaleOrdinal()
+      .domain(subgroups)
+      .range(["#e41a1c", "#377eb8", "#4daf4a"]);
+
+    //stack the data? --> stack per subgroup
+    var stackedData = d3.stack().keys(subgroups)(data);
+
+    // using mouse events to control tooltips (lines 110-129; 145-147)
+    // SHOULD BE CHANGED FOR DIFFERING GRAPHS/AXES
+    // var tooltip = d3.select('#my_dataviz')
+    //   .style('opacity', 0);
+
+    // const mouseover = (event, d) => {
+    //   tooltip.style("opacity", 1);
+    // };
+
+    // const mouseleave = (event, d) => {
+    //   // tooltip.style('opacity', 0);
+    // }
+
+    // const mousemove = (event, d) => {
+    //   const text = d3.select('#my_dataviz');
+    //   text.text(`Sales were happening!!`);
+    //   const [x, y] = d3.pointer(event);
+
+    //   tooltip
+    //     .attr('transform', `translate(${x}, ${y})`);
+    // };
+
+    var tooltip = d3
+      .select("#my_dataviz")
+      .append("div")
+      .style("opacity", 0)
+      .attr("class", "tooltip")
+      .style("background-color", "white")
+      .style("border", "solid")
+      .style("border-width", "1px")
+      .style("border-radius", "5px")
+      .style("padding", "2px");
+
+    // Three function that change the tooltip when user hover / move / leave a cell
+    var mouseover = function (d) {
+      var subgroupName = d3.select(this.parentNode).datum().key;
+      var subgroupValue = d.data[subgroupName];
+      tooltip
+        // .html("subgroup: " + subgroupName + "<br>" + "Value: " + subgroupValue)
+        .html(subgroupName + ": " + subgroupValue)
+        .style("opacity", 1);
+    };
+    var mousemove = function (d) {
+      tooltip
+        .style("left", d3.mouse(this)[0] + 90 + "px") // It is important to put the +90: other wise the tooltip is exactly where the point is an it creates a weird effect
+        .style("top", d3.mouse(this)[1] + "px");
+    };
+    var mouseleave = function (d) {
+      tooltip.style("opacity", 0);
+    };
+
+    // Show the bars
+    svg
+      .append("g")
+      .selectAll("g")
+      // Enter in the stack data = loop key per key = group per group
+      .data(stackedData)
+      .enter()
+      .append("g")
+      .attr("fill", function (d) {
+        return color(d.key);
+      })
+      .selectAll("rect")
+      // enter a second time = loop subgroup per subgroup to add all rectangles
+      .data(function (d) {
+        return d;
+      })
+      .enter()
+      .append("rect")
+      .attr("x", function (d) {
+        return x(d.data.group);
+      })
+      .attr("y", function (d) {
+        return y(d[1]);
+      })
+      .attr("height", function (d) {
+        return y(d[0]) - y(d[1]);
+      })
+      .attr("width", x.bandwidth())
+      .on("mousemove", mousemove)
+      .on("mouseleave", mouseleave)
+      .on("mouseover", mouseover);
+
+    // Add x axis label
+    svg
+      .append("text")
+      .attr("class", "x label")
+      .attr("text-anchor", "end")
+      .attr("x", width / 2)
+      .attr("y", height + 36)
+      .text("CATEGORY ID");
+
+    // Add y axis label
+    svg
+      .append("text")
+      .attr("class", "y label")
+      .attr("text-anchor", "end")
+      .attr("y", -73)
+      .attr("dy", ".75em")
+      .attr("transform", "rotate(-90)")
+      .text("LIKES, DISLIKES, COMMENTS");
+  });
+</script>
