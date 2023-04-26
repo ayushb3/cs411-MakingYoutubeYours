@@ -1,17 +1,27 @@
 <!DOCTYPE html>
 <html>
-
-<head>
+<body style="background-color: #d2edf7">
+<center>
+  <h1 style="color:rgb(0,0,0);">Making YouTube Yours!</h1>
+</center>
+  <head>
   <title>Insert Video</title>
 </head>
 
 <body>
+<center>
   <h1>Insert Video</h1>
+  <table border="1" style="border-style: solid; background-color: #FFFFFF"> 
+    <tr style="padding: 40px"> <td style="padding: 40px">
+</center>
+  <center>
   <form method="POST" action="{{ url_for('insert') }}">
     <label for="url">URL:</label>
     <input type="text" id="url" name="URL"><br><br>
     <input type="submit" value="Submit">
+  </center>
   </form>
+  
 </body>
 
 </html>
