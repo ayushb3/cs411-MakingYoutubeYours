@@ -1,0 +1,114 @@
+body {
+    background-color: #d2edf7;
+    font-family: 'Caveat', cursive;
+    margin: 0;
+    padding: 0;
+  }
+  
+  a {
+    text-decoration: none;
+  }
+  
+  table {
+    width: 100%;
+    text-align: center;
+    border-collapse: collapse;
+  }
+  
+  table, th, tr, td {
+    border: 1px solid rgb(210, 30, 30);
+    padding: 10px;
+  }
+  
+  th {
+    font-size: 20px;
+  }
+  
+  h1 {
+    color: rgb(210, 30, 30);
+    font-size: 40px;
+    text-align: center;
+    padding-top: 20px;
+  }
+  
+  p {
+    font-family: 'Lucida Handwriting';
+    font-size: 20px;
+    color: floralwhite;
+    width: 80%;
+    margin: auto;
+    text-align: justify;
+  }
+  
+  center {
+    padding: 20px;
+  }
+  
+  hr {
+    border: none;
+    height: 2px;
+    background-color: rgb(210, 30, 30);
+  }
+  
+  table.footer {
+    width: 50%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+  
+  table.footer, .footer th, .footer tr, .footer td {
+    border-color: transparent;
+  }
+  
+  .footer th {
+    color: rgb(210, 30, 30);
+  }
+  
+  .footer a {
+    color: rgb(210, 30, 30);
+  }
+  
+  .nav-link {
+    font-size: 24px;
+    color: white;
+    text-decoration: none;
+    padding: 0 10px;
+  }
+  
+  .nav-link:hover {
+    color: #ccc;
+  }
+  
+
+  .paragraph-font p {
+    font-size: 16px;
+    color: black;
+  }
+
+  #header{
+    font-family: Arial;
+    color:rgb(254,254,8);
+    font-size: 28px;
+    position:fixed;
+    display:inline-block;
+    height:30%;
+    width:100%;
+}
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #222;
+    padding: 10px 0;
+    z-index: 1000;
+  }
+  
+  body {
+    padding-top: 60px;
+  }
+  
+  .ps-link {
+    font-size: 24px;
+  }
