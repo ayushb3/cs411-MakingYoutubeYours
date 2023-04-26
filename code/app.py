@@ -5,6 +5,9 @@ from flask import Flask, render_template, request, redirect, session
 import sys
 import logging
 import secrets
+import cohere
+import random
+import pandas as pd
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -374,7 +377,7 @@ def advquery2(connection):
     WHERE title LIKE 
     CONCAT('%', 
     (
-    SELECT keywords
+    SELECT keyword
     FROM TrendingKeywords
     ORDER BY use_count DESC
     LIMIT 1
@@ -390,6 +393,123 @@ def advquery2(connection):
     cursor.close()
 
     return results
+
+
+@app.route('/observations.html', methods=['GET', 'POST'])
+def observations():
+    if request.method == 'POST':
+        min_views = request.form.get('min_views')
+        if min_views == '':
+            min_views = None
+        max_views = request.form.get('max_views')
+        if max_views == '':
+            max_views = None
+        min_likes = request.form.get('min_likes')
+        if min_likes == '':
+            min_likes = None
+        max_likes = request.form.get('max_likes')
+        if max_likes == '':
+            max_likes = None
+        min_comments = request.form.get('min_comments')
+        if min_comments == '':
+            min_comments = None
+        max_comments = request.form.get('max_comments')
+        if max_comments == '':
+            max_comments = None
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        connection = connect()
+        results = get_observations_by_filter(
+            connection, min_views, max_views, min_likes, max_likes, min_comments, max_comments, start_date, end_date)
+        return render_template('observations.html', results=results)
+    else:
+        return render_template('observations.html')
+
+
+def get_observations_by_filter(connection, min_views=None, max_views=None, min_likes=None, max_likes=None, min_comments=None, max_comments=None, start_date=None, end_date=None):
+    # establish a connection to the database
+
+    # create a cursor object
+    cursor = connection.cursor()
+
+    # call the stored procedure with the given parameters
+    cursor.callproc('GetObservationsByFilter', [
+                    min_views, max_views, min_likes, max_likes, min_comments, max_comments, start_date, end_date])
+
+    observations = [row[-1] for result in cursor.stored_results()
+                    for row in result.fetchall()]
+
+    # close the cursor and connection
+    cursor.close()
+    connection.close()
+
+    # return the results
+    return observations
+
+
+# cnx = connect()
+# print(get_observations_by_filter(cnx, 100000, 1000000, 5000,
+#                                  50000, 1000, 10000, '2021-01-01', '2022-12-31'))
+
+@app.route('/titlegen.html', methods=['GET', 'POST'])
+def cohere_title_gen_endpoint():
+    if request.method == 'POST':
+        # extract input data from request
+        user_title = request.form.get('user_title')
+        category_name = request.form.get('category_name')
+        num_titles = request.form.get('num_titles')
+
+        # establish a connection to the database
+        connection = connect()
+
+        # call the cohere_title_gen function with the given parameters
+        results = cohere_title_gen(
+            connection, user_title, category_name, num_titles)
+        return render_template('titlegen.html', results=results)
+    else:
+        return render_template('titlegen.html')
+
+
+def cohere_title_gen(connection, user_title, category_name, num_titles):
+    cursor = connection.cursor()
+    df = pd.read_csv('./sp23-cs411-team089-arys/data/categories.csv')
+    # Find the category ID for the given category name
+    categoryId = df.loc[df['category_name'] ==
+                        category_name, 'category_id'].iloc[0]
+    # Cohere API credentials
+    api_key = "AMskkjWBIdMuF5X1EgYfAqZAoypWZ9P5sFxPRTRY"
+    co = cohere.Client(api_key)
+    # query to get all keywords associated with the specified categoryId
+    query = """
+            SELECT DISTINCT tk.keyword
+        FROM TrendingKeywords tk
+        JOIN KeywordVideoMap kvm ON tk.keyword = kvm.keyword
+        JOIN VideoInfo vi ON kvm.video_id = vi.video_id
+        WHERE vi.categoryId = %s
+        LIMIT 1000;
+    """
+    # execute the query
+    cursor.execute(query, (int(categoryId),))
+    keyword_list = [row[0] for row in cursor.fetchall()]
+    print(len(keyword_list))
+
+    random_keywords = random.sample(keyword_list, 100)
+    print(random_keywords)
+    response = co.generate(
+        model='command-xlarge-nightly',
+        prompt=f"""
+            Create {num_titles} viral Youtube Video Title based on 
+            this initial title. Give each keyword in Category Keywords
+            a small weight when creating your response. 
+            Initial Title = {user_title}, Category Keywords = {random_keywords}
+            """,
+        max_tokens=50,
+        temperature=1,
+        k=0,
+        stop_sequences=[],
+        return_likelihoods='NONE')
+
+    return ('Prediction: {}'.format(response.generations[0].text))
 
 
 if __name__ == "__main__":

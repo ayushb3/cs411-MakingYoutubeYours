@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Observations</title>
+</head>
+
+<body>
+    <h1>Observations</h1>
+    <form method="post">
+        <label for="min_views">Minimum Views:</label>
+        <input type="number" id="min_views" name="min_views"><br>
+        <label for="max_views">Maximum Views:</label>
+        <input type="number" id="max_views" name="max_views"><br>
+        <label for="min_likes">Minimum Likes:</label>
+        <input type="number" id="min_likes" name="min_likes"><br>
+        <label for="max_likes">Maximum Likes:</label>
+        <input type="number" id="max_likes" name="max_likes"><br>
+        <label for="min_comments">Minimum Comments:</label>
+        <input type="number" id="min_comments" name="min_comments"><br>
+        <label for="max_comments">Maximum Comments:</label>
+        <input type="number" id="max_comments" name="max_comments"><br>
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" required><br>
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date" required><br>
+        <input type="submit" value="Submit">
+    </form>
+
+    {% if results is not none %}
+    <h1>Results:</h1>
+    <ul>
+        {% for observation in results %}
+        <li>
+            {{ observation }}
+
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    <a href="/observations.html">Back to form</a>
+    {% if results is none %}
+    <p></p>
+    {% endif %}
+</body>
+
+</html>

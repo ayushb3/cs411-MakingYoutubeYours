@@ -10,7 +10,9 @@ with open('./sp23-cs411-team089-arys/data/US_category_id.json', 'r') as f:
 categories = [(item['id'], item['snippet']['title']) for item in data['items']]
 
 # Convert the data to a Pandas DataFrame
-df = pd.DataFrame(categories, columns=['category_id', 'category_name'])
+categories_df = pd.DataFrame(
+    categories, columns=['category_id', 'category_name'])
 
-# View the resulting DataFrame
-print(df)
+# Write the DataFrame to a new CSV file
+categories_df.to_csv(
+    './sp23-cs411-team089-arys/data/categories.csv', index=False)
