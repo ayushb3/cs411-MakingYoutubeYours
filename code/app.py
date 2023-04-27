@@ -34,6 +34,11 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/index.html')
+def index1():
+    return render_template('index.html')
+
+
 @app.route('/form.html')
 def form():
     return render_template('form.html')
@@ -335,14 +340,14 @@ def advquery1(connection):
     query = """
     SELECT v.title, v.view_count
     FROM VideoInfo v
-    JOIN 
+    JOIN
     (
       SELECT v1.video_id
       FROM VideoInfo v1
       WHERE v1.view_count >= 1000000
-    ) v1 
+    ) v1
     ON v.video_id = v1.video_id
-    JOIN 
+    JOIN
     (
       SELECT DISTINCT c.channelId
       FROM Creators c
@@ -350,7 +355,7 @@ def advquery1(connection):
       WHERE v2.view_count >= 1000000
       GROUP BY c.channelId
       HAVING COUNT(DISTINCT v2.video_id) > 1
-    ) c 
+    ) c
     ON v.channelId = c.channelId
     ORDER BY v.view_count DESC
     LIMIT 15;
@@ -374,8 +379,8 @@ def advquery2_endpoint():
 def advquery2(connection):
     query = """
         SELECT categoryId, COUNT(*) FROM VideoInfo
-    WHERE title LIKE 
-    CONCAT('%', 
+    WHERE title LIKE
+    CONCAT('%',
     (
     SELECT keyword
     FROM TrendingKeywords
@@ -456,26 +461,41 @@ def cohere_title_gen_endpoint():
     if request.method == 'POST':
         # extract input data from request
         user_title = request.form.get('user_title')
-        category_name = request.form.get('category_name')
+        categoryId = request.form.get('category_name')
+        print("LOOOK HEEEEEEEERE", categoryId)
         num_titles = request.form.get('num_titles')
 
         # establish a connection to the database
         connection = connect()
+        cursor = connection.cursor()
 
         # call the cohere_title_gen function with the given parameters
         results = cohere_title_gen(
-            connection, user_title, category_name, num_titles)
-        return render_template('titlegen.html', results=results)
+            connection, user_title, categoryId, num_titles)
+        # Find all category data
+        cursor.execute('SELECT categoryId, category_name FROM CategoryInfo')
+        allCategories = cursor.fetchall()
+        app.logger.info(allCategories)
+        app.logger.info('HELLO IN POST')
+
+        cursor.close()
+        return render_template('titlegen.html', results=results, categories=allCategories)
     else:
-        return render_template('titlegen.html')
+        # Find all category data
+        connection = connect()
+        cursor = connection.cursor()
+        cursor.execute('SELECT categoryId, category_name FROM CategoryInfo')
+        allCategories = cursor.fetchall()
+        app.logger.info(allCategories)
+        app.logger.info('HELLO IN GET')
+
+        cursor.close()
+        return render_template('titlegen.html', categories=allCategories)
 
 
-def cohere_title_gen(connection, user_title, category_name, num_titles):
+def cohere_title_gen(connection, user_title, categoryId, num_titles):
     cursor = connection.cursor()
-    df = pd.read_csv('./sp23-cs411-team089-arys/data/categories.csv')
-    # Find the category ID for the given category name
-    categoryId = df.loc[df['category_name'] ==
-                        category_name, 'category_id'].iloc[0]
+
     # Cohere API credentials
     api_key = "AMskkjWBIdMuF5X1EgYfAqZAoypWZ9P5sFxPRTRY"
     co = cohere.Client(api_key)
@@ -493,14 +513,14 @@ def cohere_title_gen(connection, user_title, category_name, num_titles):
     keyword_list = [row[0] for row in cursor.fetchall()]
     print(len(keyword_list))
 
-    random_keywords = random.sample(keyword_list, 100)
+    random_keywords = random.sample(keyword_list, min(100, len(keyword_list)))
     print(random_keywords)
     response = co.generate(
         model='command-xlarge-nightly',
         prompt=f"""
-            Create {num_titles} viral Youtube Video Title based on 
+            Create {num_titles} viral Youtube Video Title based on
             this initial title. Give each keyword in Category Keywords
-            a small weight when creating your response. 
+            a small weight when creating your response.
             Initial Title = {user_title}, Category Keywords = {random_keywords}
             """,
         max_tokens=50,
@@ -509,7 +529,17 @@ def cohere_title_gen(connection, user_title, category_name, num_titles):
         stop_sequences=[],
         return_likelihoods='NONE')
 
-    return ('Prediction: {}'.format(response.generations[0].text))
+    return (f"Generated Title: {response.generations[0].text}")
+
+
+@app.route('/parse.html')
+def parse_function():
+    return render_template('parse.html')
+
+
+@app.route('/stackedbarchart.html')
+def stackedbarchart():
+    return render_template('stackedbarchart.html')
 
 
 if __name__ == "__main__":

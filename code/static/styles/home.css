@@ -3,96 +3,102 @@ body {
     font-family: 'Caveat', cursive;
     margin: 0;
     padding: 0;
-  }
-  
-  a {
+}
+
+a {
     text-decoration: none;
-  }
-  
-  table {
+}
+
+table {
     width: 100%;
     text-align: center;
     border-collapse: collapse;
-  }
-  
-  table, th, tr, td {
+}
+
+table,
+th,
+tr,
+td {
     border: 1px solid rgb(210, 30, 30);
     padding: 10px;
-  }
-  
-  th {
+}
+
+th {
     font-size: 20px;
-  }
-  
-  h1 {
+}
+
+h1 {
     color: rgb(210, 30, 30);
     font-size: 40px;
     text-align: center;
     padding-top: 20px;
-  }
-  
-  p {
+}
+
+p {
     font-family: 'Lucida Handwriting';
     font-size: 20px;
     color: floralwhite;
     width: 80%;
     margin: auto;
     text-align: justify;
-  }
-  
-  center {
+}
+
+center {
     padding: 20px;
-  }
-  
-  hr {
+}
+
+hr {
     border: none;
     height: 2px;
     background-color: rgb(210, 30, 30);
-  }
-  
-  table.footer {
+}
+
+table.footer {
     width: 50%;
     margin-top: 20px;
     margin-bottom: 20px;
-  }
-  
-  table.footer, .footer th, .footer tr, .footer td {
+}
+
+table.footer,
+.footer th,
+.footer tr,
+.footer td {
     border-color: transparent;
-  }
-  
-  .footer th {
+}
+
+.footer th {
     color: rgb(210, 30, 30);
-  }
-  
-  .footer a {
+}
+
+.footer a {
     color: rgb(210, 30, 30);
-  }
-  
-  .nav-link {
+}
+
+.nav-link {
     font-size: 24px;
     color: white;
     text-decoration: none;
     padding: 0 10px;
-  }
-  
-  .nav-link:hover {
-    color: #ccc;
-  }
-  
+}
 
-  .paragraph-font p {
+.nav-link:hover {
+    color: #ccc;
+}
+
+
+.paragraph-font p {
     font-size: 16px;
     color: black;
-  }
+}
 
-  #header{
+#header {
     font-family: Arial;
-    color:rgb(254,254,8);
+    color: rgb(254, 254, 8);
     font-size: 28px;
-    position:fixed;
-    display:inline-block;
-    height:30%;
-    width:100%;
+    position: fixed;
+    display: inline-block;
+    height: 30%;
+    width: 100%;
 }
 
 .navbar {
@@ -103,12 +109,12 @@ body {
     background-color: #222;
     padding: 10px 0;
     z-index: 1000;
-  }
-  
-  body {
+}
+
+body {
     padding-top: 60px;
-  }
-  
-  .ps-link {
+}
+
+.ps-link {
     font-size: 24px;
-  }
+}

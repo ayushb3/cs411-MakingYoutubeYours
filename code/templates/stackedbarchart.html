@@ -1,39 +1,41 @@
 <!DOCTYPE html>
 <meta charset="utf-8" />
-<link rel="stylesheet" type="text/css" href="test.css" />
+
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/style.css')}}" />
 <!-- Load d3.js -->
 <script src="https://d3js.org/d3.v4.js"></script>
+
 <head>
   <title>Stacked Bar Chart</title>
 </head>
 
 <body>
-    <a name="top">
-        <table border="1" style="text-align:center; width:100%">
-          <tr style="color:rgb(210,30,30);">
-            <td><a href = "index.html"> Home </a></td>
-            <td><a href = "titlegen.html">Title Generator </a></td>
-            <td><a href = "trending.html"> What's Trending </a></td>
-            <td><a href = "events.html"> Current Events </a></td>
-            <td><a href = "tracking.html"> Track A YouTuber </a></td>
-            <td><a href = "form.html"> Form </a></td>
-            <td><a href = "parse.html"> Filter Data </a></td>
-          </tr>
-        </table>
+  <a name="top">
+    <table border="1" style="text-align:center; width:100%">
+      <tr style="color:rgb(210,30,30);">
+        <td><a href="index.html"> Home </a></td>
+        <td><a href="titlegen.html">Title Generator </a></td>
+        <td><a href="trending.html"> What's Trending </a></td>
+        <td><a href="events.html"> Current Events </a></td>
+        <td><a href="tracking.html"> Track A YouTuber </a></td>
+        <td><a href="form.html"> Form </a></td>
+        <td><a href="parse.html"> Filter Data </a></td>
+      </tr>
+    </table>
 
-  <br /><br />
+    <br /><br />
 
-  <!-- Create a div where the graph will take place -->
-  <div id="my_dataviz"></div>
+    <!-- Create a div where the graph will take place -->
+    <div id="my_dataviz"></div>
 
-  <h3>Customizing Your Chart!</h3>
+    <h3>Customizing Your Chart!</h3>
 
-  <p>
-    This graph shows category IDs as they correspond to the number of likes, dislikes, and comments. 
-    <br/> You can see the exact number by hovering over each section of this stacked barchart.
-  </p>
+    <p>
+      This graph shows category IDs as they correspond to the number of likes, dislikes, and comments.
+      <br /> You can see the exact number by hovering over each section of this stacked barchart.
+    </p>
 
-  <br /><br />
+    <br /><br />
 </body>
 
 <script>
@@ -52,7 +54,7 @@
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   // Parse the Data
-  d3.csv("stacked_barchart.csv", function (data) {
+  d3.csv("static/stacked_barchart.csv", function (data) {
     // List of subgroups = header of the csv files = soil condition here
     var subgroups = data.columns.slice(1);
 
