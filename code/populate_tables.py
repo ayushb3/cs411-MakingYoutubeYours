@@ -75,6 +75,7 @@ connection.commit()
 
 
 # Insert data into TrendingKeywords table
+# Ignore duplicates
 with open('./sp23-cs411-team089-arys/data/keywords.csv', 'r', encoding='utf-8') as csvfile:
     csvreader = csv.reader(csvfile)
     next(csvreader)  # skip header row
