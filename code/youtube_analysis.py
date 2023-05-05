@@ -6,6 +6,8 @@ import os
 import google_auth_oauthlib.flow
 import googleapiclient.errors
 import googleapiclient.discovery
+from settings import YOUTUBE_DEVELOPER_KEY
+
 
 # extract the video id from a given youtube URL
 
@@ -25,7 +27,7 @@ def youtube_link_to_id(url):
 def extract_video_info(video_id):
 
     # set up API credentials and build the YouTube API client
-    DEVELOPER_KEY = "AIzaSyCqHaHXpfDm0yAMOnwSoTH-JT8Iurl4elU"
+    DEVELOPER_KEY = YOUTUBE_DEVELOPER_KEY
     YOUTUBE_API_SERVICE_NAME = "youtube"
     YOUTUBE_API_VERSION = "v3"
     youtube = googleapiclient.discovery.build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,

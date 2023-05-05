@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <meta charset="utf-8" />
 
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/style.css')}}" />
+<!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/style.css')}}" /> -->
 <!-- Load d3.js -->
 <script src="https://d3js.org/d3.v4.js"></script>
 
@@ -25,15 +25,31 @@
 
     <br /><br />
 
+
+
     <!-- Create a div where the graph will take place -->
     <div id="my_dataviz"></div>
 
-    <h3>Customizing Your Chart!</h3>
+    <h3>Likes, Dislikes, and Comments vs. Video Category</h3>
 
     <p>
       This graph shows category IDs as they correspond to the number of likes, dislikes, and comments.
       <br /> You can see the exact number by hovering over each section of this stacked barchart.
     </p>
+    <p>
+
+
+      <table border="1" style="border-style: solid; background-color: #FFFFFF">
+        <tr style="padding: 10px">
+          <td style="padding: 10px">
+
+            <center>
+              Legend:
+              <p style="color:red;">Red: Likes</p>
+              <p style="color:rgb(20, 82, 197);">Blue: Dislikes</p>
+              <p style="color:rgb(57, 187, 31);">Green: Comments</p>
+    </p>
+    </center>
 
     <br /><br />
 </body>
@@ -74,7 +90,7 @@
       .call(d3.axisBottom(x).tickSizeOuter(0));
 
     // Add Y axis
-    var y = d3.scaleLinear().domain([0, 1500000]).range([height, 0]);
+    var y = d3.scaleLinear().domain([0, 7000000]).range([height, 0]);
     svg.append("g").call(d3.axisLeft(y));
 
     // color palette = one color per subgroup
@@ -176,7 +192,7 @@
       .attr("text-anchor", "end")
       .attr("x", width / 2)
       .attr("y", height + 36)
-      .text("CATEGORY ID");
+      .text("CATEGORY NAME");
 
     // Add y axis label
     svg
@@ -189,3 +205,5 @@
       .text("LIKES, DISLIKES, COMMENTS");
   });
 </script>
+
+<body style="background-color: #d2edf7"></body>
